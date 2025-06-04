@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Método de Roteiro de Aulas - John Delmiro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db; /* Azul principal */
+            --secondary-color: #2ecc71; /* Verde para destaques */
+            --background-color: #f4f7f9; /* Fundo suave */
+            --card-background: #ffffff; /* Fundo dos cards */
+            --text-color: #333333; /* Cor principal do texto */
+            --light-text-color: #555555; /* Cor de texto mais clara para dicas */
+            --border-color: #e0e0e0; /* Cor das bordas */
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 900px;
+        }
+
+        header img {
+            max-height: 60px;
+            margin-right: 20px;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.8em;
+            color: var(--primary-color);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .section-card {
+            background-color: var(--card-background);
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-card h2, .section-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .section-card h2 {
+            font-size: 1.6em;
+            display: flex;
+            align-items: center;
+        }
+         .section-card h2 .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .section-card h3 {
+            font-size: 1.3em;
+            margin-top: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: var(--font-family);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        textarea {
+            min-height: 180px; /* Aumentei um pouco a altura mínima */
+            resize: vertical;
+        }
+
+        .dicas {
+            background-color: #eaf5ff; 
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            font-size: 0.95em;
+            color: var(--light-text-color);
+        }
+
+        .dicas ul {
+            list-style-position: inside;
+            padding-left: 0;
+        }
+        .dicas ul li {
+            margin-bottom: 8px;
+        }
+
+        .dicas p {
+            margin-bottom: 10px;
+        }
+        .dicas strong {
+            color: var(--primary-color);
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: inline-block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #2980b9; 
+            transform: translateY(-2px);
+        }
+        
+        #exemplo-roteiro pre {
+            background-color: #2d2d2d; 
+            color: #f0f0f0;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap; 
+            word-wrap: break-word;
+        }
+
+        #checklist ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        #checklist li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+         #checklist li:hover {
+            background-color: #eaf5ff;
+         }
+
+        #checklist input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.3);
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+        #checklist label {
+            margin-bottom: 0; 
+            cursor: pointer;
+            flex-grow: 1;
+        }
+        #checklist input[type="checkbox"]:checked + label {
+            text-decoration: line-through;
+            color: var(--light-text-color);
+        }
+        
+        .checklist-group-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            header img {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            header h1 {
+                font-size: 1.5em;
+            }
+            .section-card h2 {
+                font-size: 1.4em;
+            }
+            .section-card h3 {
+                font-size: 1.2em;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="https://i.postimg.cc/bNwhtTws/logodelmirodigital-2.png" alt="Logo John Delmiro">
+            <h1>Método de Roteiro de Aulas - John Delmiro</h1>
+        </header>
+
+        <section class="section-card" id="gerador-roteiro">
+            <h2><span class="icon">📝</span>Gerador de Roteiro de Aula</h2>
+            <form id="scriptForm">
+                <div>
+                    <label for="aulaTitulo">Título da Aula:</label>
+                    <input type="text" id="aulaTitulo" name="aulaTitulo" placeholder="Ex: Dominando Funções Essenciais do Excel">
+                </div>
+                <div>
+                    <label for="aulaModulo">Módulo:</label>
+                    <input type="text" id="aulaModulo" name="aulaModulo" placeholder="Ex: Módulo 2 - Ferramentas Avançadas">
+                </div>
+                <div>
+                    <label for="nomeCurso">Nome do Curso:</label>
+                    <input type="text" id="nomeCurso" name="nomeCurso" placeholder="Ex: Excel para Negócios">
+                </div>
+
+                <hr style="margin: 30px 0; border: 0; border-top: 1px solid var(--border-color);">
+
+                <h3><span class="icon">🎬</span> Ato 1: Introdução</h3>
+                <div class="dicas">
+                    <strong>Dicas para a Introdução (Despertar o interesse e contextualizar):</strong>
+                    <ul>
+                        <li>Apresente o tema da aula e explique por que ele é importante para o aluno.</li>
+                        <li>Estabeleça as expectativas claras: o que será abordado, qual o objetivo e como isso conecta com a trajetória do curso.</li>
+                        <li>Crie um senso de continuidade com o que já foi estudado (caso seja uma aula que dá sequência a outra).</li>
+                    </ul>
+                </div>
+                <textarea id="aulaIntroducao" name="aulaIntroducao" placeholder="Escreva aqui a introdução da sua aula..."></textarea>
+
+                <h3><span class="icon">📖</span> Ato 2: Desenvolvimento</h3>
+                <div class="dicas">
+                    <strong>Dicas para o Desenvolvimento (Transmitir o conhecimento de forma clara e envolvente):</strong>
+                    <ul>
+                        <li>Divida o conteúdo em blocos lógicos, claros e progressivos.</li>
+                        <li>Ilustre com exemplos, casos práticos ou demonstrações para facilitar a compreensão.</li>
+                        <li>Inclua pausas naturais no discurso para que o aluno processe a informação antes de avançar.</li>
+                        <li>Use recursos visuais, slides, gráficos e storytelling para manter o ritmo interessante.</li>
+                    </ul>
+                </div>
+                <textarea id="aulaDesenvolvimento" name="aulaDesenvolvimento" placeholder="Detalhe aqui o desenvolvimento do conteúdo..."></textarea>
+
+                <h3><span class="icon">🏁</span> Ato 3: Encerramento</h3>
+                <div class="dicas">
+                    <strong>Dicas para o Encerramento (Consolidar e preparar o próximo passo):</strong>
+                    <ul>
+                        <li>Faça uma recapitulação rápida dos principais pontos abordados na aula.</li>
+                        <li>Enfatize o valor prático: como o aluno pode aplicar o que acabou de aprender.</li>
+                        <li>Apresente um breve gancho para a próxima aula, antecipando o tema e mostrando como ele complementa o que foi visto hoje.</li>
+                        <li>Finalize com uma mensagem inspiradora ou provocadora para manter o aluno motivado a continuar.</li>
+                    </ul>
+                    <p><strong>Resumo final do Encerramento:</strong></p>
+                    <ul>
+                        <li>✔️ Recapitulação do conteúdo principal.</li>
+                        <li>✔️ Valor prático e aplicação imediata.</li>
+                        <li>✔️ Breve introdução ao tema da próxima aula.</li>
+                        <li>✔️ Encerramento inspirador para manter o engajamento.</li>
+                    </ul>
+                </div>
+                <textarea id="aulaEncerramento" name="aulaEncerramento" placeholder="Conclua sua aula aqui..."></textarea>
+
+                <button type="button" class="btn" id="downloadPdfBtn">
+                    <span class="icon">📄</span> Baixar Roteiro em PDF
+                </button>
+            </form>
+        </section>
+
+        <section class="section-card" id="exemplo-roteiro">
+            <h2><span class="icon">💡</span>Exemplo de Estrutura de Roteiro</h2>
+            <pre>
+🎬 Aula: [Nome do Tema da Aula]
+
+🎥 Ato 1 – Introdução (1 minuto)
+“Olá! Seja muito bem-vindo(a) à nossa aula de hoje. Eu sou [Seu Nome] e o tema que vamos abordar é [tema da aula].
+Esse tema é essencial porque [explique em 1 frase curta o valor dele].
+Hoje você vai aprender:
+[Ponto 1]
+[Ponto 2]
+[Ponto 3]
+E tudo isso de forma prática e direta. Essa aula complementa o que já vimos antes e vai te ajudar a avançar ainda mais.”
+
+🎥 Ato 2 – Desenvolvimento (5 minutos)
+1️⃣ Primeiro ponto (1 min 40 seg)
+“Vamos começar com [ponto 1].
+Explique o conceito ou processo de forma clara.
+Dê um exemplo simples ou demonstre visualmente para fixar a ideia.”
+
+2️⃣ Segundo ponto (1 min 40 seg)
+“Agora, vamos para [ponto 2].
+Mostre como ele complementa o primeiro ponto e destaque seu valor prático.”
+
+3️⃣ Terceiro ponto (1 min 40 seg)
+“Por fim, chegamos a [ponto 3].
+Conclua mostrando como os três pontos se conectam.”
+
+🎥 Ato 3 – Encerramento (1 minuto)
+🔄 Recapitulação
+“Antes de encerrar, vamos recapitular o que aprendemos:
+Primeiro, vimos [ponto 1].
+Depois, entendemos [ponto 2].
+E finalizamos com [ponto 3].”
+
+💡 Aplicação prática
+“Agora você já pode aplicar esses conceitos e ver resultados rapidamente.”
+
+👉 Próxima aula
+“Na próxima aula, vamos explorar [tema da próxima aula], que vai aprofundar ainda mais o que aprendemos hoje.”
+
+🌟 Mensagem final
+“Obrigado por estar aqui! Continue praticando e, até a próxima aula!”</pre>
+        </section>
+
+        <section class="section-card" id="checklist">
+            <h2><span class="icon">✅</span>Checklist para Gravação de Aulas Online</h2>
+            <ul>
+                <li class="checklist-group-title">🔲 Introdução</li>
+                <li><input type="checkbox" id="chk1" name="chk1"><label for="chk1">Cumprimente o público e apresente-se (nome e breve autoridade no tema).</label></li>
+                <li><input type="checkbox" id="chk2" name="chk2"><label for="chk2">Apresente o tema da aula.</label></li>
+                <li><input type="checkbox" id="chk3" name="chk3"><label for="chk3">Conte o que as pessoas vão aprender e por que é importante.</label></li>
+                <li class="checklist-group-title">🔲 Desenvolvimento (Corpo da Aula)</li>
+                <li><input type="checkbox" id="chk4" name="chk4"><label for="chk4">Divida o conteúdo em tópicos claros e objetivos.</label></li>
+                <li><input type="checkbox" id="chk5" name="chk5"><label for="chk5">Explique cada ponto com exemplos e, se possível, analogias.</label></li>
+                <li><input type="checkbox" id="chk6" name="chk6"><label for="chk6">Use um tom de voz claro e natural.</label></li>
+                <li><input type="checkbox" id="chk7" name="chk7"><label for="chk7">Mantenha a coerência e a ordem lógica das ideias.</label></li>
+                <li><input type="checkbox" id="chk8" name="chk8"><label for="chk8">Use pausas naturais para dar ênfase e permitir a assimilação.</label></li>
+                <li><input type="checkbox" id="chk9" name="chk9"><label for="chk9">Se fizer sentido, utilize recursos visuais (slides, imagens, quadro branco).</label></li>
+                <li class="checklist-group-title">🔲 Conclusão (Encerramento)</li>
+                <li><input type="checkbox" id="chk10" name="chk10"><label for="chk10">Recapitule os principais pontos da aula.</label></li>
+                <li><input type="checkbox" id="chk11" name="chk11"><label for="chk11">Reforce a importância do que foi aprendido.</label></li>
+                <li><input type="checkbox" id="chk12" name="chk12"><label for="chk12">Dê uma chamada para ação (CTA): pode ser para praticar, assistir a próxima aula ou deixar dúvidas.</label></li>
+                <li class="checklist-group-title">🔲 Cenário e Equipamentos</li>
+                <li><input type="checkbox" id="chk13" name="chk13"><label for="chk13">Local silencioso e sem distrações.</label></li>
+                <li><input type="checkbox" id="chk14" name="chk14"><label for="chk14">Fundo neutro ou profissional.</label></li>
+                <li><input type="checkbox" id="chk15" name="chk15"><label for="chk15">Boa iluminação (natural ou artificial).</label></li>
+                <li><input type="checkbox" id="chk16" name="chk16"><label for="chk16">Microfone funcionando bem (áudio limpo e sem ruído).</label></li>
+                <li><input type="checkbox" id="chk17" name="chk17"><label for="chk17">Câmera estável (tripé ou apoio firme).</label></li>
+                <li><input type="checkbox" id="chk18" name="chk18"><label for="chk18">Teste tudo antes de começar!</label></li>
+                <li class="checklist-group-title">🔲 Aparência e Postura</li>
+                <li><input type="checkbox" id="chk19" name="chk19"><label for="chk19">Roupas adequadas e neutras.</label></li>
+                <li><input type="checkbox" id="chk20" name="chk20"><label for="chk20">Postura ereta e confiante.</label></li>
+                <li><input type="checkbox" id="chk21" name="chk21"><label for="chk21">Expressividade natural, sem exagero.</label></li>
+                <li><input type="checkbox" id="chk22" name="chk22"><label for="chk22">Olhe para a câmera para criar conexão.</label></li>
+                <li class="checklist-group-title">🔲 Finalização</li>
+                <li><input type="checkbox" id="chk23" name="chk23"><label for="chk23">Agradeça a atenção.</label></li>
+                <li><input type="checkbox" id="chk24" name="chk24"><label for="chk24">Desligue a gravação e revise o material final (áudio e vídeo).</label></li>
+            </ul>
+        </section>
+
+        <footer style="text-align: center; padding: 20px 0; color: var(--light-text-color); font-size: 0.9em;">
+            <p>&copy; <span id="currentYear"></span> John Delmiro. Todos os direitos reservados.</p>
+            <p>Uma ferramenta para impulsionar sua criação de conteúdo.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({
+                orientation: 'p',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const aulaTitulo = document.getElementById('aulaTitulo').value.trim();
+            const aulaModulo = document.getElementById('aulaModulo').value.trim();
+            const nomeCurso = document.getElementById('nomeCurso').value.trim();
+            const aulaIntroducao = document.getElementById('aulaIntroducao').value.trim();
+            const aulaDesenvolvimento = document.getElementById('aulaDesenvolvimento').value.trim();
+            const aulaEncerramento = document.getElementById('aulaEncerramento').value.trim();
+            
+            const pageMargin = 15;
+            const pageWidth = doc.internal.pageSize.getWidth() - 2 * pageMargin;
+            const pageHeight = doc.internal.pageSize.getHeight();
+            let currentY = pageMargin;
+            const defaultLineHeightMultiplier = 1.4; // Ajustado para um pouco mais de espaço entre linhas
+            const paragraphSpacing = 4; // Espaço extra em mm entre parágrafos
+
+            // Função para verificar se precisa adicionar nova página e resetar Y
+            function checkAndAddPage(neededHeight) {
+                if (currentY + neededHeight > pageHeight - pageMargin) {
+                    doc.addPage();
+                    currentY = pageMargin;
+                    // Opcional: Adicionar cabeçalho/rodapé em novas páginas
+                    // doc.setFontSize(8);
+                    // doc.text(`Página ${doc.internal.getNumberOfPages()}`, pageWidth + pageMargin - 10, pageHeight - 5);
+                    return true; 
+                }
+                return false; 
+            }
+            
+            // Informações do Curso/Módulo
+            doc.setFontSize(10);
+            doc.setTextColor(100); 
+            const infoLineHeight = 10 * defaultLineHeightMultiplier / doc.internal.scaleFactor;
+            if (nomeCurso) {
+                checkAndAddPage(infoLineHeight);
+                doc.text(`Curso: ${nomeCurso}`, pageMargin, currentY);
+                currentY += infoLineHeight;
+            }
+            if (aulaModulo) {
+                checkAndAddPage(infoLineHeight);
+                doc.text(`Módulo: ${aulaModulo}`, pageMargin, currentY);
+                currentY += infoLineHeight;
+            }
+            if (nomeCurso || aulaModulo) {
+                 currentY += 5; // Espaço extra
+            }
+
+            // Título da Aula
+            const titleFontSize = 18;
+            doc.setFontSize(titleFontSize);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(52, 152, 219); // Azul (var(--primary-color))
+            
+            const titleText = aulaTitulo ? `Roteiro da Aula: ${aulaTitulo}` : "Roteiro da Aula";
+            const titleLines = doc.splitTextToSize(titleText, pageWidth);
+            const titleLineHeightCalculated = titleFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
+
+            for (let i = 0; i < titleLines.length; i++) {
+                checkAndAddPage(titleLineHeightCalculated);
+                doc.text(titleLines[i], pageMargin, currentY);
+                currentY += titleLineHeightCalculated;
+            }
+            currentY += 10; // Espaço após o título principal
+
+            // Função para adicionar seções de conteúdo
+            function addSectionToPdf(title, content) {
+                const sectionTitleFontSize = 14;
+                const sectionTitleLineHeight = sectionTitleFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
+                
+                checkAndAddPage(sectionTitleLineHeight + 5); // Espaço antes do título da seção
+                
+                doc.setFontSize(sectionTitleFontSize);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(44, 62, 80); 
+                doc.text(title, pageMargin, currentY);
+                currentY += sectionTitleLineHeight + 3; // Espaço após título da seção
+
+                const bodyFontSize = 11;
+                const bodyLineHeight = bodyFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
+                doc.setFontSize(bodyFontSize);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(51, 51, 51); 
+                
+                if (content) {
+                    const paragraphs = content.split('\n'); 
+                    paragraphs.forEach(paragraph => {
+                        const trimmedParagraph = paragraph.trim();
+                        if (trimmedParagraph === "") { 
+                            checkAndAddPage(bodyLineHeight / 2); // Metade da altura para linha em branco
+                            currentY += bodyLineHeight / 2; 
+                            return;
+                        }
+                        const textLines = doc.splitTextToSize(trimmedParagraph, pageWidth);
+                        textLines.forEach(line => {
+                            checkAndAddPage(bodyLineHeight);
+                            doc.text(line, pageMargin, currentY);
+                            currentY += bodyLineHeight;
+                        });
+                        currentY += paragraphSpacing; 
+                    });
+                } else {
+                    checkAndAddPage(bodyLineHeight);
+                    doc.text("[Conteúdo não preenchido]", pageMargin, currentY);
+                    currentY += bodyLineHeight + paragraphSpacing;
+                }
+                currentY += 5; // Espaço extra após a seção inteira
+            }
+
+            addSectionToPdf("🎬 Ato 1: Introdução", aulaIntroducao);
+            addSectionToPdf("📖 Ato 2: Desenvolvimento", aulaDesenvolvimento);
+            addSectionToPdf("🏁 Ato 3: Encerramento", aulaEncerramento);
+            
+            // Nome do arquivo PDF
+            let filename = "roteiro_aula";
+            if(aulaTitulo) {
+                // Remove caracteres especiais, substitui espaços e múltiplos hífens/underscores por um único underscore, remove underscores no início/fim.
+                filename = `roteiro_${aulaTitulo.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/[\s-]+/g, '_')}`;
+            }
+            filename = filename.substring(0, 60); // Limita o comprimento do nome do arquivo
+            
+            doc.save(`${filename}.pdf`);
+        });
+
+        // Animação suave de scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
