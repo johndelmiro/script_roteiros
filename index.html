@@ -91,7 +91,7 @@
             padding-bottom: 8px;
             font-weight: 600;
         }
-        
+
         .section-card h2 {
             font-size: 1.6em;
             display: flex;
@@ -134,12 +134,12 @@
         }
 
         textarea {
-            min-height: 180px; /* Aumentei um pouco a altura mínima */
+            min-height: 180px;
             resize: vertical;
         }
 
         .dicas {
-            background-color: #eaf5ff; 
+            background-color: #eaf5ff;
             border-left: 4px solid var(--primary-color);
             padding: 15px;
             margin-bottom: 15px;
@@ -179,19 +179,19 @@
         }
 
         .btn:hover {
-            background-color: #2980b9; 
+            background-color: #2980b9;
             transform: translateY(-2px);
         }
-        
+
         #exemplo-roteiro pre {
-            background-color: #2d2d2d; 
+            background-color: #2d2d2d;
             color: #f0f0f0;
             padding: 20px;
             border-radius: var(--border-radius);
             overflow-x: auto;
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.9em;
-            white-space: pre-wrap; 
+            white-space: pre-wrap;
             word-wrap: break-word;
         }
 
@@ -219,7 +219,7 @@
             cursor: pointer;
         }
         #checklist label {
-            margin-bottom: 0; 
+            margin-bottom: 0;
             cursor: pointer;
             flex-grow: 1;
         }
@@ -227,7 +227,7 @@
             text-decoration: line-through;
             color: var(--light-text-color);
         }
-        
+
         .checklist-group-title {
             font-weight: bold;
             color: var(--primary-color);
@@ -413,157 +413,183 @@ E finalizamos com [ponto 3].”
         </section>
 
         <footer style="text-align: center; padding: 20px 0; color: var(--light-text-color); font-size: 0.9em;">
-            <p>&copy; <span id="currentYear"></span> John Delmiro. Todos os direitos reservados.</p>
+            <p>© <span id="currentYear"></span> John Delmiro. Todos os direitos reservados.</p>
             <p>Uma ferramenta para impulsionar sua criação de conteúdo.</p>
         </footer>
     </div>
 
     <script>
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- INÍCIO DA LÓGICA DE LOCALSTORAGE ---
+            const fieldsToPersist = [
+                'aulaTitulo', 'aulaModulo', 'nomeCurso',
+                'aulaIntroducao', 'aulaDesenvolvimento', 'aulaEncerramento'
+            ];
 
-        document.getElementById('downloadPdfBtn').addEventListener('click', function() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: 'p',
-                unit: 'mm',
-                format: 'a4'
-            });
-
-            const aulaTitulo = document.getElementById('aulaTitulo').value.trim();
-            const aulaModulo = document.getElementById('aulaModulo').value.trim();
-            const nomeCurso = document.getElementById('nomeCurso').value.trim();
-            const aulaIntroducao = document.getElementById('aulaIntroducao').value.trim();
-            const aulaDesenvolvimento = document.getElementById('aulaDesenvolvimento').value.trim();
-            const aulaEncerramento = document.getElementById('aulaEncerramento').value.trim();
-            
-            const pageMargin = 15;
-            const pageWidth = doc.internal.pageSize.getWidth() - 2 * pageMargin;
-            const pageHeight = doc.internal.pageSize.getHeight();
-            let currentY = pageMargin;
-            const defaultLineHeightMultiplier = 1.4; // Ajustado para um pouco mais de espaço entre linhas
-            const paragraphSpacing = 4; // Espaço extra em mm entre parágrafos
-
-            // Função para verificar se precisa adicionar nova página e resetar Y
-            function checkAndAddPage(neededHeight) {
-                if (currentY + neededHeight > pageHeight - pageMargin) {
-                    doc.addPage();
-                    currentY = pageMargin;
-                    // Opcional: Adicionar cabeçalho/rodapé em novas páginas
-                    // doc.setFontSize(8);
-                    // doc.text(`Página ${doc.internal.getNumberOfPages()}`, pageWidth + pageMargin - 10, pageHeight - 5);
-                    return true; 
-                }
-                return false; 
-            }
-            
-            // Informações do Curso/Módulo
-            doc.setFontSize(10);
-            doc.setTextColor(100); 
-            const infoLineHeight = 10 * defaultLineHeightMultiplier / doc.internal.scaleFactor;
-            if (nomeCurso) {
-                checkAndAddPage(infoLineHeight);
-                doc.text(`Curso: ${nomeCurso}`, pageMargin, currentY);
-                currentY += infoLineHeight;
-            }
-            if (aulaModulo) {
-                checkAndAddPage(infoLineHeight);
-                doc.text(`Módulo: ${aulaModulo}`, pageMargin, currentY);
-                currentY += infoLineHeight;
-            }
-            if (nomeCurso || aulaModulo) {
-                 currentY += 5; // Espaço extra
-            }
-
-            // Título da Aula
-            const titleFontSize = 18;
-            doc.setFontSize(titleFontSize);
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(52, 152, 219); // Azul (var(--primary-color))
-            
-            const titleText = aulaTitulo ? `Roteiro da Aula: ${aulaTitulo}` : "Roteiro da Aula";
-            const titleLines = doc.splitTextToSize(titleText, pageWidth);
-            const titleLineHeightCalculated = titleFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
-
-            for (let i = 0; i < titleLines.length; i++) {
-                checkAndAddPage(titleLineHeightCalculated);
-                doc.text(titleLines[i], pageMargin, currentY);
-                currentY += titleLineHeightCalculated;
-            }
-            currentY += 10; // Espaço após o título principal
-
-            // Função para adicionar seções de conteúdo
-            function addSectionToPdf(title, content) {
-                const sectionTitleFontSize = 14;
-                const sectionTitleLineHeight = sectionTitleFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
-                
-                checkAndAddPage(sectionTitleLineHeight + 5); // Espaço antes do título da seção
-                
-                doc.setFontSize(sectionTitleFontSize);
-                doc.setFont(undefined, 'bold');
-                doc.setTextColor(44, 62, 80); 
-                doc.text(title, pageMargin, currentY);
-                currentY += sectionTitleLineHeight + 3; // Espaço após título da seção
-
-                const bodyFontSize = 11;
-                const bodyLineHeight = bodyFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
-                doc.setFontSize(bodyFontSize);
-                doc.setFont(undefined, 'normal');
-                doc.setTextColor(51, 51, 51); 
-                
-                if (content) {
-                    const paragraphs = content.split('\n'); 
-                    paragraphs.forEach(paragraph => {
-                        const trimmedParagraph = paragraph.trim();
-                        if (trimmedParagraph === "") { 
-                            checkAndAddPage(bodyLineHeight / 2); // Metade da altura para linha em branco
-                            currentY += bodyLineHeight / 2; 
-                            return;
+            function loadFormData() {
+                fieldsToPersist.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        const savedValue = localStorage.getItem(fieldId);
+                        if (savedValue !== null) {
+                            field.value = savedValue;
                         }
-                        const textLines = doc.splitTextToSize(trimmedParagraph, pageWidth);
-                        textLines.forEach(line => {
-                            checkAndAddPage(bodyLineHeight);
-                            doc.text(line, pageMargin, currentY);
-                            currentY += bodyLineHeight;
-                        });
-                        currentY += paragraphSpacing; 
-                    });
-                } else {
-                    checkAndAddPage(bodyLineHeight);
-                    doc.text("[Conteúdo não preenchido]", pageMargin, currentY);
-                    currentY += bodyLineHeight + paragraphSpacing;
-                }
-                currentY += 5; // Espaço extra após a seção inteira
+                    }
+                });
             }
 
-            addSectionToPdf("🎬 Ato 1: Introdução", aulaIntroducao);
-            addSectionToPdf("📖 Ato 2: Desenvolvimento", aulaDesenvolvimento);
-            addSectionToPdf("🏁 Ato 3: Encerramento", aulaEncerramento);
-            
-            // Nome do arquivo PDF
-            let filename = "roteiro_aula";
-            if(aulaTitulo) {
-                // Remove caracteres especiais, substitui espaços e múltiplos hífens/underscores por um único underscore, remove underscores no início/fim.
-                filename = `roteiro_${aulaTitulo.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/[\s-]+/g, '_')}`;
+            function saveFormData(fieldId, value) {
+                localStorage.setItem(fieldId, value);
             }
-            filename = filename.substring(0, 60); // Limita o comprimento do nome do arquivo
-            
-            doc.save(`${filename}.pdf`);
-        });
 
-        // Animação suave de scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
+            fieldsToPersist.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', (event) => {
+                        saveFormData(fieldId, event.target.value);
                     });
                 }
             });
-        });
+            loadFormData();
+            // --- FIM DA LÓGICA DE LOCALSTORAGE ---
 
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const aulaTitulo = document.getElementById('aulaTitulo').value.trim();
+                const aulaModulo = document.getElementById('aulaModulo').value.trim();
+                const nomeCurso = document.getElementById('nomeCurso').value.trim();
+                const aulaIntroducao = document.getElementById('aulaIntroducao').value.trim();
+                const aulaDesenvolvimento = document.getElementById('aulaDesenvolvimento').value.trim();
+                const aulaEncerramento = document.getElementById('aulaEncerramento').value.trim();
+
+                const pageMargin = 15;
+                const pageWidth = doc.internal.pageSize.getWidth() - 2 * pageMargin;
+                const pageHeight = doc.internal.pageSize.getHeight();
+                let currentY = pageMargin;
+                const defaultLineHeightMultiplier = 1.4;
+                const paragraphSpacing = 4;
+
+                function checkAndAddPage(neededHeight) {
+                    if (currentY + neededHeight > pageHeight - pageMargin) {
+                        doc.addPage();
+                        currentY = pageMargin;
+                        return true;
+                    }
+                    return false;
+                }
+
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                const infoLineHeight = 10 * defaultLineHeightMultiplier / doc.internal.scaleFactor;
+                if (nomeCurso) {
+                    checkAndAddPage(infoLineHeight);
+                    doc.text(`Curso: ${nomeCurso}`, pageMargin, currentY);
+                    currentY += infoLineHeight;
+                }
+                if (aulaModulo) {
+                    checkAndAddPage(infoLineHeight);
+                    doc.text(`Módulo: ${aulaModulo}`, pageMargin, currentY);
+                    currentY += infoLineHeight;
+                }
+                if (nomeCurso || aulaModulo) {
+                     currentY += 5;
+                }
+
+                const titleFontSize = 18;
+                doc.setFontSize(titleFontSize);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(52, 152, 219);
+
+                const titleText = aulaTitulo ? `Roteiro da Aula: ${aulaTitulo}` : "Roteiro da Aula";
+                const titleLines = doc.splitTextToSize(titleText, pageWidth);
+                const titleLineHeightCalculated = titleFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
+
+                for (let i = 0; i < titleLines.length; i++) {
+                    checkAndAddPage(titleLineHeightCalculated);
+                    doc.text(titleLines[i], pageMargin, currentY);
+                    currentY += titleLineHeightCalculated;
+                }
+                currentY += 10;
+
+                function addSectionToPdf(title, content) {
+                    const sectionTitleFontSize = 14;
+                    const sectionTitleLineHeight = sectionTitleFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
+
+                    checkAndAddPage(sectionTitleLineHeight + 5);
+
+                    doc.setFontSize(sectionTitleFontSize);
+                    doc.setFont(undefined, 'bold');
+                    doc.setTextColor(44, 62, 80);
+                    doc.text(title, pageMargin, currentY);
+                    currentY += sectionTitleLineHeight + 3;
+
+                    const bodyFontSize = 11;
+                    const bodyLineHeight = bodyFontSize * defaultLineHeightMultiplier / doc.internal.scaleFactor;
+                    doc.setFontSize(bodyFontSize);
+                    doc.setFont(undefined, 'normal');
+                    doc.setTextColor(51, 51, 51);
+
+                    if (content) {
+                        const paragraphs = content.split('\n');
+                        paragraphs.forEach(paragraph => {
+                            const trimmedParagraph = paragraph.trim();
+                            if (trimmedParagraph === "") {
+                                checkAndAddPage(bodyLineHeight / 2);
+                                currentY += bodyLineHeight / 2;
+                                return;
+                            }
+                            const textLines = doc.splitTextToSize(trimmedParagraph, pageWidth);
+                            textLines.forEach(line => {
+                                checkAndAddPage(bodyLineHeight);
+                                doc.text(line, pageMargin, currentY);
+                                currentY += bodyLineHeight;
+                            });
+                            currentY += paragraphSpacing;
+                        });
+                    } else {
+                        checkAndAddPage(bodyLineHeight);
+                        doc.text("[Conteúdo não preenchido]", pageMargin, currentY);
+                        currentY += bodyLineHeight + paragraphSpacing;
+                    }
+                    currentY += 5;
+                }
+
+                // MODIFICAÇÃO AQUI: Removidos os emojis dos títulos das seções para o PDF
+                addSectionToPdf("Ato 1: Introdução", aulaIntroducao);
+                addSectionToPdf("Ato 2: Desenvolvimento", aulaDesenvolvimento);
+                addSectionToPdf("Ato 3: Encerramento", aulaEncerramento);
+
+                let filename = "roteiro_aula";
+                if(aulaTitulo) {
+                    filename = `roteiro_${aulaTitulo.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/[\s-]+/g, '_')}`;
+                }
+                filename = filename.substring(0, 60);
+
+                doc.save(`${filename}.pdf`);
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+        }); // Fim do DOMContentLoaded
     </script>
 </body>
 </html>
